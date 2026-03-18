@@ -1,36 +1,105 @@
-# Event-Driven Board System
+# Kubernetes Deployment (EKS)
 
-Kafka 기반 이벤트 드리븐 아키텍처를 적용해  
-서비스 간 결합도를 낮추고 확장성을 고려한  
-MSA 백엔드 포트폴리오 프로젝트입니다.
+Event-Driven Board System의 Kubernetes(EKS) 배포 구성을 관리하는 레포지토리입니다.
 
-게시글 작성 이후의 후속 처리를 비동기 이벤트로 분리해  
-응답 흐름과 운영 안정성을 함께 고려했습니다.
+각 서비스(gateway, user, board, point)를 Deployment로 구성하고,  
+Service를 통해 내부 및 외부 통신을 설정했습니다.
 
-## Architecture Overview
+---
 
-```
+## Overview
+
+본 레포지토리는 MSA 기반 게시판 시스템을 Kubernetes 환경에서 실행하기 위한  
+배포 설정(Deployment, Service, ConfigMap, Secret)을 포함합니다.
+
+---
+
+## Architecture
+
 [ Client ]
-      ↓
-[ Gateway ]
-      ↓
-[ Board Service ] ──▶ (Kafka Event) ──▶ [ Activity Service ]
-```
+    ↓
+[ LoadBalancer (gateway-service) ]
+    ↓
+[ Gateway Service ]
+    ↓
+[ user / board / point services ]
 
-## Why Event-Driven
+---
 
-기능 확장 시 서비스 간 동기 의존이 증가하는 문제를 피하기 위해  
-상태 변화는 이벤트로 전달하도록 설계했습니다.  
-이를 통해 장애 전파를 줄이고, 서비스 확장에 유연한 구조를 목표로 했습니다.
+## Services
 
-## Infrastructure
+| Service          | Type          | Port            | Description        |
+|------------------|---------------|-----------------|--------------------|
+| gateway-service | LoadBalancer  | 8000 → 8080     | 외부 진입점        |
+| user-service    | ClusterIP     | 8080 → 3000     | 사용자 서비스      |
+| board-service   | ClusterIP     | 8081 → 8080     | 게시글 서비스      |
+| point-service   | ClusterIP     | 8082 → 3000     | 포인트 서비스      |
 
-- Docker 기반 실행 환경
-- AWS EC2 / RDS 기준 설계
-- 향후 오토 스케일링 및 관리형 메시지 서비스 확장 고려
+---
 
-## More Details
+## Key Design
 
-설계 배경과 상세 구현 과정은  
-Notion 기반 포트폴리오 문서에 정리되어 있으며,  
-면접 시 설명 자료로 활용 가능합니다.
+- 서비스 간 통신은 Kubernetes Service DNS 기반으로 구성
+- Pod 직접 접근이 아닌 Service 단위 통신 사용
+- 환경 변수는 ConfigMap / Secret으로 분리
+- Deployment 기반 Rolling Update 적용
+
+---
+
+## Directory Structure
+
+k8s/
+  ├── gateway/
+  │   ├── deployment.yml
+  │   └── service.yml
+  ├── user/
+  │   ├── deployment.yml
+  │   └── service.yml
+  ├── board/
+  │   ├── deployment.yml
+  │   └── service.yml
+  └── point/
+      ├── deployment.yml
+      └── service.yml
+
+---
+
+## Deployment
+
+### 1. ConfigMap / Secret 적용
+
+kubectl apply -f config/
+
+### 2. 서비스 배포
+
+kubectl apply -f k8s/
+
+### 3. 상태 확인
+
+kubectl get pods  
+kubectl get svc  
+
+---
+
+## Troubleshooting
+
+- ConfigMap 변경 후 반영되지 않음  
+  → rollout restart 필요
+
+- 환경 변수 적용 실패  
+  → Deployment에 envFrom 설정 누락 확인
+
+- 서비스 간 통신 실패  
+  → Service 이름 + Service Port로 호출해야 함
+
+- Pod Pending 발생  
+  → Node 리소스 부족 → NodeGroup 확장 또는 replicas 조정
+
+---
+
+## Future Improvements
+
+- HPA (Horizontal Pod Autoscaler) 적용
+- Ingress + 도메인 연결
+- GitOps (ArgoCD) 도입
+- 모니터링 (Prometheus / Grafana)
