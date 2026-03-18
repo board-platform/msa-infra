@@ -9,4 +9,4 @@ spec:
     app: point-service
   ports:
     - port: 8082
-      targetPort: 8080
+      targetPort: 3000

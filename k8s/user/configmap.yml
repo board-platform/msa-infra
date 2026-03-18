@@ -5,4 +5,4 @@ metadata:
   name: user-config
 
 data:
-  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-server:9092
+  KAFKA_BOOTSTRAP_SERVERS: 10.0.3.4:9092

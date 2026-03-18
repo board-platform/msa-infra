@@ -22,5 +22,7 @@ spec:
           ports:
             - containerPort: 8080
           envFrom:
+            - configMapRef:
+                name: gateway-config
             - secretRef:
                 name: gateway-secret

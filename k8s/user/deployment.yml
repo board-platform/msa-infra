@@ -18,9 +18,9 @@ spec:
         - name: regcred
       containers:
         - name: user-service
-          image: 267837905230.dkr.ecr.ap-northeast-2.amazonaws.com/board-system/user-service:latest
+          image: 267837905230.dkr.ecr.ap-northeast-2.amazonaws.com/board-system/user-service-nest:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 3000
           envFrom:
             - configMapRef:
                 name: user-config

@@ -18,10 +18,12 @@ spec:
         - name: regcred
       containers:
         - name: point-service
-          image: 267837905230.dkr.ecr.ap-northeast-2.amazonaws.com/board-system/point-service:latest
+          image: 267837905230.dkr.ecr.ap-northeast-2.amazonaws.com/board-system/point-service-nest:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 3000
           envFrom:
+            - configMapRef:
+                name: point-config
             - secretRef:
                 name: point-secret
                 

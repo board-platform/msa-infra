@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: point-config
+
+data:
+  KAFKA_BOOTSTRAP_SERVERS: 10.0.3.4:9092

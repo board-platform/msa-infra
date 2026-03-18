@@ -5,10 +5,9 @@ metadata:
   name: gateway-service
 
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: gateway-service
   ports:
     - port: 8000
       targetPort: 8080
-      nodePort: 30080
